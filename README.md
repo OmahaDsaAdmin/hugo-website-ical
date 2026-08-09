@@ -23,5 +23,3 @@ Github Actions can run this program and commit any new events into your hugo rep
 1. A Github Secret called `BOT_PAT`
 2. An export path within the workspace (not local)
 3. One (or more) Action Network API Keys (preferably stored as repo secrets)
-
-See the `example-pull-events.txt` file for a `.yml` example of how to implement this action. It is necessary to store this entire repo (minus the git stuff) in your hugo repo under .github/scripts/hugo-website-events.
