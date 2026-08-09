@@ -1,0 +1,51 @@
+name: Pull Calendar
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily
+  workflow_dispatch:
+
+jobs:
+  update-content:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this (Hugo) repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.0"
+
+      - name: Build Go Script
+        working-directory: .github/scripts/hugo-website-events/
+        run: go build
+
+      - name: Run Go script to update content
+        working-directory: .github/scripts/hugo-website-events/
+        env:
+          API_KEY1: ${{ secrets.ACTION_NETWORK_API_KEY }}
+          API_KEY2: ${{ secrets.AN_AFFORDABLE_HOUSING_CC_KEY }}
+          API_KEY3: ${{ secrets.AN_COMMITTEE_OF_CORRESPONDENCE_KEY }}
+          API_KEY4: ${{ secrets.AN_CONVENTION_COMMITTEES_KEY }}
+          API_KEY5: ${{ secrets.AN_LABOR_WG_KEY }}
+          API_KEY6: ${{ secrets.AN_LEGISLATIVE_WG_KEY }}
+          API_KEY7: ${{ secrets.AN_MEMBERSHIP_OUTREACH_COMMITTEE_KEY }}
+          API_KEY8: ${{ secrets.AN_MUTUAL_AID_WG_KEY }}
+          API_KEY9: ${{ secrets.AN_POLITICAL_EDUCATION_COMMITTEE_KEY }}
+          API_KEY10: ${{ secrets.AN_TECH_COMMITTEE_KEY }}
+          API_KEY11: ${{ secrets.AN_TRBA_WG_KEY }}
+        run: sudo ./hugo-website-events "$GITHUB_WORKSPACE/content/events" "$API_KEY1" "$API_KEY2" "$API_KEY3" "$API_KEY4" "$API_KEY5" "$API_KEY6" "$API_KEY7" "$API_KEY8" "$API_KEY9" "$API_KEY10" "$API_KEY11"
+
+      - name: Commit and push changes
+        env:
+          BOT_PAT: ${{ secrets.BOT_PAT }}
+        run: |
+          git config user.name "OmahaDsaAdmin"
+          git config user.email "omahadsa@gmail.com"
+          git add .
+          git commit -m "cron: action network events added via pull-events.yml" || echo "No changes to commit"
+          git push https://x-access-token:${BOT_PAT}@github.com/${{ github.repository }}.git HEAD:main
